@@ -20,3 +20,19 @@ message CreateCharacterRequest {
 message CreateCharacterResponse {
   int64 characterId = 1;
 }
+
+
+service GetCharacterService {
+  rpc getCharacter(GetCharacterRequest) returns (CreateCharacterResponse);
+}
+
+message GetCharacterRequest {
+  int64 characterId = 1;
+}
+
+message GetCharacterResponse {
+  int64 animeId = 1;
+  string animeName = 2;
+  string name = 3;
+  string content = 4;
+}

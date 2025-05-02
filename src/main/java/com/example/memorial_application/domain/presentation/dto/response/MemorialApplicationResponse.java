@@ -1,0 +1,16 @@
+package com.example.memorial_application.domain.presentation.dto.response;
+
+import java.time.LocalDateTime;
+
+public record MemorialApplicationResponse (
+        // 유저 정보
+        String userId,
+        // 캐릭터 정보
+        Long characterId,
+        String name,
+        //신청 정보
+        String content,
+        LocalDateTime createdAt,
+        Long likes
+) {
+}

@@ -3,6 +3,7 @@ package com.example.memorial_application.domain.service.gRPC;
 import com.example.grpc.CreateCharacterRequest;
 import com.example.grpc.CreateCharacterResponse;
 import com.example.grpc.CreateCharacterServiceGrpc;
+import com.example.memorial_application.domain.domain.MemorialApplication;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
@@ -28,5 +29,13 @@ public class GrpcClientService {
   private CreateCharacterResponse getCreateCharacterResponse(CreateCharacterRequest request) {
     CreateCharacterResponse response = createCharacterServiceBlockingStub.createCharacter(request);
     return response;
+  }
+
+  public String getCharacterName(MemorialApplication memorialApplication) {
+    Long characterId = memorialApplication.getCharacterId();
+    // GetCharacterResponse response = getCharacter(characterId);
+    // String name = response.getName();
+    String name = null;
+    return name;
   }
 }
