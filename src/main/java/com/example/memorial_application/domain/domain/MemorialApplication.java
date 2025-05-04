@@ -27,7 +27,17 @@ public class MemorialApplication {
   @Enumerated(EnumType.STRING)
   private MemorialApplicationState state;
 
+  @PrePersist
+  public void init() {
+    this.createdAt = LocalDateTime.now();
+  }
   public void reject() {
     this.state = MemorialApplicationState.REJECTED;
   }
+
+  public void approve() {
+    this.state = MemorialApplicationState.APPROVED;
+  }
+
+
 }

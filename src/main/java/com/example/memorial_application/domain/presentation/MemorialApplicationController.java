@@ -17,13 +17,13 @@ import java.util.List;
 public class MemorialApplicationController {
   private final MemorialApplicationService memorialApplicationService;
 
-  @PostMapping ("/withCharacter")// 캐릭터가 존재하지 않을 경우 -> 캐릭터와 추모관 신청의 생성 시간이 같다.
+  @PostMapping ("/apply/withCharacter")// 캐릭터가 존재하지 않을 경우 -> 캐릭터와 추모관 신청의 생성 시점이 같다.
   @ResponseStatus(HttpStatus.CREATED)
   public void applyWithCharacter(@RequestHeader("user-id") String userId, @RequestBody MemorialApplicationCreateWithCharacterRequest request) {
     memorialApplicationService.applyWithCharacter(userId, request);
   }
 
-  @PostMapping
+  @PostMapping("/apply")
   @ResponseStatus(HttpStatus.CREATED)
   public void apply(@RequestHeader("user-id") String userId, @RequestBody MemorialApplicationCreateRequest request) {
     Long characterId = request.characterId();
@@ -44,7 +44,13 @@ public class MemorialApplicationController {
     return ResponseEntity.ok(memorialApplicationResponse);
   }
 
-  @PatchMapping("/{memorial-application-id}")
+  @PatchMapping("/approve/{memorial-application-id}/admin")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public void approve(@PathVariable("memorial-application-id") Long memorialApplicationId) {
+    memorialApplicationService.approve(memorialApplicationId);
+  }
+  
+  @PatchMapping("/cancel/{memorial-application-id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void cancel(@PathVariable("memorial-application-id") Long memorialApplicationId) {
     memorialApplicationService.reject(memorialApplicationId);

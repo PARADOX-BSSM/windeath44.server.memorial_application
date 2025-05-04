@@ -1,16 +1,15 @@
 package com.example.memorial_application.domain.service;
 
-import com.example.grpc.CreateCharacterRequest;
 import com.example.memorial_application.domain.domain.MemorialApplication;
 import com.example.memorial_application.domain.domain.mapper.MemorialApplicationMapper;
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
-import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateRequest;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplication;
 import com.example.memorial_application.domain.service.gRPC.GrpcClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,19 +34,16 @@ public class MemorialApplicationService {
   }
 
   private Long createCharacterAndGetId(Long animeId, String name, String characterContent, String deathReason, Long lifeTime) {
-    CreateCharacterRequest createCharacterRequest = CreateCharacterRequest.newBuilder()
-            .setAnimeId(animeId)
-            .setName(name)
-            .setContent(characterContent)
-            .setDeathReason(deathReason)
-            .setLifeTime(lifeTime)
-            .build();
-    Long characterId = grpcClient.createCharacter(createCharacterRequest);
+    Long characterId = null;
+    // 오케스트레이션 서버에 create character 요청
     return characterId;
   }
 
   public void apply(String userId, Long characterId, String content) {
     MemorialApplication memorialApplication = memorialApplicationMapper.toMemorialApplication(userId, characterId, content);
+    // 만약 해당 캐릭터가 이미 추모중이라면 apply 실패
+    grpcClient.validateNotAlreadyMemorialized(characterId);
+
     memorialApplicationRepository.save(memorialApplication);
   }
 
@@ -58,7 +54,7 @@ public class MemorialApplicationService {
   }
 
   private List<MemorialApplicationResponse> getMemorialApplicationList() {
-    return memorialApplicationRepository.findAll()
+    List<MemorialApplicationResponse> memorialApplicationResponseList = memorialApplicationRepository.findAll()
             .stream()
             .map((memorialApplication) -> {
               String name = grpcClient.getCharacterName(memorialApplication);
@@ -66,13 +62,14 @@ public class MemorialApplicationService {
               return memorialAPplicationResponse;
             })
             .toList();
+    return memorialApplicationResponseList;
   }
 
+  @Transactional
   public void reject(Long memorialApplicationId) {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
     memorialApplication.reject();
   }
-
 
   private MemorialApplication findMemorialApplicationById(Long memorialApplicationId) {
     return memorialApplicationRepository.findById(memorialApplicationId)
@@ -86,4 +83,22 @@ public class MemorialApplicationService {
     return memorialApplicationResponse;
   }
 
+  @Transactional
+  public void approve(Long memorialApplicationId) {
+    MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
+    memorialApplication.approve();
+
+    // kafka로 오케스트레이션 서버에 memorial application approve 요청 with memorialApplicationId
+    // 오케스트레이션 서버에서 kafka로 memorial 서버로 생성 요청
+    // 오케스트레이션 서버에서 kafka로 anime 서버의 캐릭터 상태를 'NOT_MEMORIALIZING' -> 'MEMORIALIZING'으로 변환
+
+
+    // pending 상태의 같은 캐릭터에 대한 요청들을 rejected 상태로 변환
+    restMemorialApplicationRejected(memorialApplicationId, memorialApplication);
+  }
+
+  private void restMemorialApplicationRejected(Long memorialApplicationId, MemorialApplication memorialApplication) {
+    Long characterId = memorialApplication.getCharacterId();
+    memorialApplicationRepository.updateStateToRejectedByCharacterId(memorialApplicationId, characterId);
+  }
 }

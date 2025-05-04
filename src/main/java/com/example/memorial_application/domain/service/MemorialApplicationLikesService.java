@@ -28,3 +28,12 @@ public class MemorialApplicationLikesService {
 
   private MemorialApplicationLikes saveMemorialApplicationLike(MemorialApplicationLikesId memorialApplicationLikesId) {
     MemorialApplicationLikes memorialApplicationLike = memorialApplicationLikesMapper.toMemorialApplicationLike(memorialApplicationLikesId);
+    memorialApplicationLikesRepository.save(memorialApplicationLike);
+    return memorialApplicationLike;
+  }
+
+  public Long countLikes(Long memorialApplicationId) {
+    Long count = memorialApplicationLikesRepository.countById(memorialApplicationId);
+    return count;
+  }
+}

@@ -33,9 +33,10 @@ public class MemorialApplicationMapper {
     Long characterId = memorialApplication.getCharacterId();
     String content = memorialApplication.getContent();
     LocalDateTime createdAt = memorialApplication.getCreatedAt();
+    MemorialApplicationState state = memorialApplication.getState();
     Long likes = memorialApplicationLikesService.countLikes(memorialApplicationId);
 
-    return new MemorialApplicationResponse(userId, characterId, name, content, createdAt, likes);
+    return new MemorialApplicationResponse(userId, characterId, name, memorialApplicationId, content, createdAt, state, likes);
   }
 
 }

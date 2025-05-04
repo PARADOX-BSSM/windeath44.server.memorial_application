@@ -1,41 +1,41 @@
 package com.example.memorial_application.domain.service.gRPC;
 
-import com.example.grpc.CreateCharacterRequest;
-import com.example.grpc.CreateCharacterResponse;
-import com.example.grpc.CreateCharacterServiceGrpc;
+import com.example.grpc.*;
 import com.example.memorial_application.domain.domain.MemorialApplication;
+import com.example.memorial_application.domain.service.exception.AlreadyMemorializedCharacter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GrpcClientService {
+  private static String MEMORIALIZING = "MEMORIALIZING";
   @GrpcClient("anime-server")
-  private CreateCharacterServiceGrpc.CreateCharacterServiceBlockingStub createCharacterServiceBlockingStub;
+  private GetCharacterServiceGrpc.GetCharacterServiceBlockingStub getCharacterServiceBlockingStub;
 
-  public Long createCharacter(CreateCharacterRequest request) {
-    Long characterId = sendToCreateCharacter(request);
-    return characterId;
-  }
-
-  private Long sendToCreateCharacter(CreateCharacterRequest request) {
-    CreateCharacterResponse response = getCreateCharacterResponse(request);
-    Long characterId = response.getCharacterId();
-    return characterId;
-  }
-
-
-  private CreateCharacterResponse getCreateCharacterResponse(CreateCharacterRequest request) {
-    CreateCharacterResponse response = createCharacterServiceBlockingStub.createCharacter(request);
-    return response;
-  }
 
   public String getCharacterName(MemorialApplication memorialApplication) {
     Long characterId = memorialApplication.getCharacterId();
-    // GetCharacterResponse response = getCharacter(characterId);
-    // String name = response.getName();
-    String name = null;
+    GetCharacterResponse response = getCharacter(characterId);
+    String name = response.getName();
     return name;
+  }
+
+  private GetCharacterResponse getCharacter(Long characterId) {
+    GetCharacterRequest getCharacterRequest = GetCharacterRequest.newBuilder()
+            .setCharacterId(characterId)
+            .build();
+    GetCharacterResponse getCharacterResponse = getCharacterServiceBlockingStub.getCharacter(getCharacterRequest);
+    return getCharacterResponse;
+  }
+
+  public void validateNotAlreadyMemorialized(Long characterId) {
+    GetCharacterResponse response = getCharacter(characterId);
+    String state = response.getState();
+    log.error(state);
+    if (MEMORIALIZING.equals(state)) throw new AlreadyMemorializedCharacter("Already memorialized character");
   }
 }
