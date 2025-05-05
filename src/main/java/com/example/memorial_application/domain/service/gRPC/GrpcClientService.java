@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class GrpcClientService {
   private static String MEMORIALIZING = "MEMORIALIZING";
   @GrpcClient("anime-server")
@@ -35,7 +34,6 @@ public class GrpcClientService {
   public void validateNotAlreadyMemorialized(Long characterId) {
     GetCharacterResponse response = getCharacter(characterId);
     String state = response.getState();
-    log.error(state);
     if (MEMORIALIZING.equals(state)) throw new AlreadyMemorializedCharacter("Already memorialized character");
   }
 }

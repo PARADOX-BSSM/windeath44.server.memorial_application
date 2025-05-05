@@ -1,11 +1,18 @@
 package com.example.memorial_application.domain.service;
 
 import com.example.memorial_application.domain.domain.MemorialApplication;
+import com.example.memorial_application.domain.domain.MemorialApplicationLikes;
+import com.example.memorial_application.domain.domain.MemorialApplicationLikesId;
+import com.example.memorial_application.domain.domain.mapper.MemorialApplicationLikesMapper;
 import com.example.memorial_application.domain.domain.mapper.MemorialApplicationMapper;
+import com.example.memorial_application.domain.domain.repository.MemorialApplicationLikesRepository;
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.service.exception.AlreadyMemorialApplicationLikes;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplication;
+import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikes;
 import com.example.memorial_application.domain.service.gRPC.GrpcClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +26,9 @@ public class MemorialApplicationService {
   private final MemorialApplicationRepository memorialApplicationRepository;
   private final MemorialApplicationMapper memorialApplicationMapper;
   private final GrpcClientService grpcClient;
+
+  private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
+  private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
 
   public void applyWithCharacter(String userId, MemorialApplicationCreateWithCharacterRequest request) {
     Long animeId = request.animeId();
@@ -43,22 +53,21 @@ public class MemorialApplicationService {
     MemorialApplication memorialApplication = memorialApplicationMapper.toMemorialApplication(userId, characterId, content);
     // 만약 해당 캐릭터가 이미 추모중이라면 apply 실패
     grpcClient.validateNotAlreadyMemorialized(characterId);
-
     memorialApplicationRepository.save(memorialApplication);
   }
 
 
-  public List<MemorialApplicationResponse> findAll() {
-    List<MemorialApplicationResponse> memorialApplicationList = getMemorialApplicationList();
+  public List<MemorialAllApplicationResponse> findAll() {
+    List<MemorialAllApplicationResponse> memorialApplicationList = getMemorialApplicationList();
     return memorialApplicationList;
   }
 
-  private List<MemorialApplicationResponse> getMemorialApplicationList() {
-    List<MemorialApplicationResponse> memorialApplicationResponseList = memorialApplicationRepository.findAll()
+  private List<MemorialAllApplicationResponse> getMemorialApplicationList() {
+    List<MemorialAllApplicationResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
             .stream()
             .map((memorialApplication) -> {
               String name = grpcClient.getCharacterName(memorialApplication);
-              MemorialApplicationResponse memorialAPplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, name);
+              MemorialAllApplicationResponse memorialAPplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
               return memorialAPplicationResponse;
             })
             .toList();
@@ -76,12 +85,16 @@ public class MemorialApplicationService {
             .orElseThrow(() -> new NotFoundMemorialApplication("Not found memorial application"));
   }
 
-  public MemorialApplicationResponse findById(Long memorialApplicationId) {
+  public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
     String name = grpcClient.getCharacterName(memorialApplication);
-    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, name);
+    MemorialApplicationLikesId memorialAPplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+
+    boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialAPplicationLikesId);
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, name, userDidLikes);
     return memorialApplicationResponse;
   }
+
 
   @Transactional
   public void approve(Long memorialApplicationId) {
@@ -100,5 +113,36 @@ public class MemorialApplicationService {
   private void restMemorialApplicationRejected(Long memorialApplicationId, MemorialApplication memorialApplication) {
     Long characterId = memorialApplication.getCharacterId();
     memorialApplicationRepository.updateStateToRejectedByCharacterId(memorialApplicationId, characterId);
+  }
+
+  @Transactional
+  public void like(String userId, Long memorialApplicationId) {
+    MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+    boolean existsMemorialApplicationLikes = memorialApplicationLikesRepository.existsById(memorialApplicationLikesId);
+    if (existsMemorialApplicationLikes) {
+      throw new AlreadyMemorialApplicationLikes("Already exists memorial application like");
+    }
+    saveMemorialApplicationLike(memorialApplicationLikesId, memorialApplicationId);
+  }
+
+  @Transactional
+  public void unlike(String userId, Long memorialApplicationId) {
+    MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+    MemorialApplicationLikes memorialApplicationLikes = memorialApplicationLikesRepository.findById(memorialApplicationLikesId)
+                    .orElseThrow(() -> new NotFoundMemorialApplicationLikes("Not found memorial application likes"));
+    deleteMemorialApplicationLike(memorialApplicationLikes, memorialApplicationId);
+  }
+
+  private MemorialApplicationLikes deleteMemorialApplicationLike(MemorialApplicationLikes memorialApplicationLike, Long memorialApplicationId) {
+    memorialApplicationLikesRepository.delete(memorialApplicationLike);
+    memorialApplicationRepository.decrementLikes(memorialApplicationId);
+    return memorialApplicationLike;
+  }
+
+  private MemorialApplicationLikes saveMemorialApplicationLike(MemorialApplicationLikesId memorialApplicationLikesId, Long memorialApplicationId) {
+    MemorialApplicationLikes memorialApplicationLike = memorialApplicationLikesMapper.toMemorialApplicationLike(memorialApplicationLikesId);
+    memorialApplicationLikesRepository.save(memorialApplicationLike);
+    memorialApplicationRepository.incrementLikes(memorialApplicationId);
+    return memorialApplicationLike;
   }
 }

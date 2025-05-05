@@ -22,6 +22,7 @@ public class MemorialApplication {
   private String userId;
   private Long characterId;
   private String content;
+  private Long likes;
   @CreatedDate
   private LocalDateTime createdAt;
   @Enumerated(EnumType.STRING)
@@ -30,6 +31,7 @@ public class MemorialApplication {
   @PrePersist
   public void init() {
     this.createdAt = LocalDateTime.now();
+    this.likes = 0L;
   }
   public void reject() {
     this.state = MemorialApplicationState.REJECTED;
@@ -40,4 +42,8 @@ public class MemorialApplication {
   }
 
 
+  public void countLikes(Long likes) {
+    this.likes = likes;
+  }
 }
+

@@ -2,12 +2,13 @@ package com.example.memorial_application.domain.presentation;
 
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateRequest;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
 import com.example.memorial_application.domain.service.MemorialApplicationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 
 import java.util.List;
 
@@ -33,14 +34,14 @@ public class MemorialApplicationController {
 
 
   @GetMapping
-  public ResponseEntity<List<MemorialApplicationResponse>> findAll() {
-    List<MemorialApplicationResponse> memorialApplicationResponse = memorialApplicationService.findAll();
+  public ResponseEntity<List<MemorialAllApplicationResponse>> findAll() {
+    List<MemorialAllApplicationResponse> memorialApplicationResponse = memorialApplicationService.findAll();
     return ResponseEntity.ok(memorialApplicationResponse);
   }
 
   @GetMapping("/{memorial-application-id}")
-  public ResponseEntity<MemorialApplicationResponse> findById(@PathVariable("memorial-application-id") Long memorialApplicationId) {
-    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationService.findById(memorialApplicationId);
+  public ResponseEntity<MemorialApplicationResponse> findById(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationService.findById(memorialApplicationId, userId);
     return ResponseEntity.ok(memorialApplicationResponse);
   }
 

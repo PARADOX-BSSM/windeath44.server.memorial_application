@@ -10,6 +10,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MemorialApplicationLikesRepository extends JpaRepository<MemorialApplicationLikes, MemorialApplicationLikesId> {
 
-  @Query("select count(ml) from MemorialApplicationLikes ml where ml.id.memorialApplicationId = :memorialApplicationId")
-  Long countById(@Param("memorialApplicationId") Long memorialApplicationId);
 }
