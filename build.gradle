@@ -29,6 +29,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
+    implementation 'org.springframework.kafka:spring-kafka'
+
+
     implementation platform('io.grpc:grpc-bom:1.58.0')
     implementation 'io.grpc:grpc-netty-shaded'
     implementation 'io.grpc:grpc-protobuf'
