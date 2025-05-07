@@ -1,11 +1,11 @@
 package com.example.memorial_application.global.config;
 
 import com.example.memorial_application.global.config.properties.KafkaProperties;
-import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -27,7 +27,6 @@ public class KafkaConfig {
     KafkaProperties.Consumer consumer = kafkaProperties.getConsumer();
     String groupId = consumer.getGroup_id();
     String autoOffsetReset = consumer.getAuto_offset_reset();
-
 
     Map<String, Object> props = new HashMap<>();
     props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServer);

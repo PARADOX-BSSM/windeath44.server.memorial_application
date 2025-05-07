@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface MemorialApplicationRepository extends JpaRepository<MemorialApplication, Long> {
 
+  @Modifying
   @Query(value = "update MemorialApplication m set m.state = 'REJECTED' where m.characterId = :characterId and m.memorialApplicationId != :memorialApplicationId")
   void updateStateToRejectedByCharacterId(@Param("memorialApplicationId") Long memorialApplicationId, @Param("characterId") Long characterId);
 

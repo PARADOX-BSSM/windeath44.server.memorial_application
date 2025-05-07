@@ -15,9 +15,8 @@ import com.example.memorial_application.domain.service.exception.NotFoundMemoria
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikes;
 import com.example.memorial_application.domain.service.gRPC.GrpcClientService;
 import com.example.memorial_application.global.utils.KafkaProducer;
-import com.example.memorial_application.global.utils.dto.ApprovedMemorialApplicationMessage;
-import com.example.memorial_application.global.utils.dto.KafkaMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,7 +104,8 @@ public class MemorialApplicationService {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
     memorialApplication.approve();
     // kafka로 오케스트레이션 서버에 memorial application approve 요청 with memorialApplicationId
-    kafkaProducer.send("approved-memorial-application", new ApprovedMemorialApplicationMessage(memorialApplicationId));
+    kafkaProducer.send("approved-memorial-application", memorialApplicationId.toString());
+
     // 오케스트레이션 서버에서 kafka로 memorial 서버로 생성 요청
     // 오케스트레이션 서버에서 kafka로 anime 서버의 캐릭터 상태를 'NOT_MEMORIALIZING' -> 'MEMORIALIZING'으로 변환
     // pending 상태의 같은 캐릭터에 대한 요청들을 rejected 상태로 변환
