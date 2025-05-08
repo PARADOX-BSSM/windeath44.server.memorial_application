@@ -1,9 +1,5 @@
 package com.example.memorial_application.global.error;
 
-import com.example.memorial_application.domain.service.exception.AlreadyMemorialApplicationLikes;
-import com.example.memorial_application.domain.service.exception.AlreadyMemorializedCharacter;
-import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplication;
-import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikes;
 import com.example.memorial_application.global.error.exception.ErrorCode;
 import com.example.memorial_application.global.error.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;

@@ -70,8 +70,8 @@ public class MemorialApplicationService {
             .stream()
             .map((memorialApplication) -> {
               String name = grpcClient.getCharacterName(memorialApplication);
-              MemorialAllApplicationResponse memorialAPplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
-              return memorialAPplicationResponse;
+              MemorialAllApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
+              return memorialApplicationResponse;
             })
             .toList();
     return memorialApplicationResponseList;
