@@ -24,7 +24,7 @@ public class MemorialApplicationMapper {
 
   }
 
-  public MemorialAllApplicationResponse toMemorialAllApplicationResponse(MemorialApplication memorialApplication, String name) {
+  public MemorialAllApplicationResponse toMemorialAllApplicationResponse(MemorialApplication memorialApplication) {
     Long memorialApplicationId = memorialApplication.getMemorialApplicationId();
     String userId = memorialApplication.getUserId();
     Long characterId = memorialApplication.getCharacterId();
@@ -33,10 +33,10 @@ public class MemorialApplicationMapper {
     MemorialApplicationState state = memorialApplication.getState();
     Long likes = memorialApplication.getLikes();
 
-    return new MemorialAllApplicationResponse(userId, characterId, name, memorialApplicationId, content, createdAt, state, likes);
+    return new MemorialAllApplicationResponse(userId, characterId, memorialApplicationId, content, createdAt, state, likes);
   }
 
-  public MemorialApplicationResponse toMemorialApplicationResponse(MemorialApplication memorialApplication, String name, boolean userDidLike) {
+  public MemorialApplicationResponse toMemorialApplicationResponse(MemorialApplication memorialApplication, boolean userDidLike) {
     String userId = memorialApplication.getUserId();
     Long characterId = memorialApplication.getCharacterId();
     String content = memorialApplication.getContent();
@@ -44,6 +44,6 @@ public class MemorialApplicationMapper {
     MemorialApplicationState state = memorialApplication.getState();
     Long likes = memorialApplication.getLikes();
 
-    return new MemorialApplicationResponse(userId, characterId, name, content, createdAt, state, likes, userDidLike);
+    return new MemorialApplicationResponse(userId, characterId, content, createdAt, state, likes, userDidLike);
   }
 }

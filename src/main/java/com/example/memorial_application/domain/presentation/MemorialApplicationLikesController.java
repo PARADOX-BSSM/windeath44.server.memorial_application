@@ -1,8 +1,11 @@
 package com.example.memorial_application.domain.presentation;
 
+import com.example.memorial_application.domain.presentation.dto.ResponseDtoMapper;
+import com.example.memorial_application.domain.presentation.dto.response.ResponseDto;
 import com.example.memorial_application.domain.service.MemorialApplicationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -10,17 +13,25 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value="/memorials/application/likes")
 public class MemorialApplicationLikesController {
   private final MemorialApplicationService memorialApplicationService;
+  private final ResponseDtoMapper responseDtoMapper;
 
   @PostMapping("/{memorial-application-id}")
-  @ResponseStatus(HttpStatus.CREATED)
-  public void like(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
+  public ResponseEntity<ResponseDto<Void>> like(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
     memorialApplicationService.like(userId, memorialApplicationId);
+    ResponseDto<Void> responseDto = responseDtoMapper.toResponseDto("like memorial application", null);
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(responseDto);
   }
 
   @DeleteMapping("/{memorial-application-id}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void unlike(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public ResponseEntity<ResponseDto<Void>> unlike(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
     memorialApplicationService.unlike(userId, memorialApplicationId);
+    ResponseDto<Void> responseDto = responseDtoMapper.toResponseDto("unlike memorial application", null);
+    return ResponseEntity
+            .status(HttpStatus.ACCEPTED)
+            .body(responseDto);
   }
 
 }

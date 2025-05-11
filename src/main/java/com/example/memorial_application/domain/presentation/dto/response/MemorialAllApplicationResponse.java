@@ -9,7 +9,6 @@ public record MemorialAllApplicationResponse (
         String userId,
         // 캐릭터 정보
         Long characterId,
-        String name,
         //신청 정보
         Long memorialApplicationId,
         String content,
