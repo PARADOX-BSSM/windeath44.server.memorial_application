@@ -10,11 +10,13 @@ import com.example.memorial_application.domain.domain.repository.MemorialApplica
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
-import com.example.memorial_application.domain.service.exception.AlreadyMemorialApplicationLikes;
-import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplication;
-import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikes;
+import com.example.memorial_application.domain.service.exception.AlreadyMemorialApplicationLikesException;
+import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
+import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikesException;
 import com.example.memorial_application.domain.service.gRPC.GrpcClientService;
+import com.example.memorial_application.global.utils.KafkaProducer;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class MemorialApplicationService {
   private final MemorialApplicationRepository memorialApplicationRepository;
   private final MemorialApplicationMapper memorialApplicationMapper;
   private final GrpcClientService grpcClient;
+  private final KafkaProducer kafkaProducer;
 
   private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
   private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
@@ -67,8 +70,8 @@ public class MemorialApplicationService {
             .stream()
             .map((memorialApplication) -> {
               String name = grpcClient.getCharacterName(memorialApplication);
-              MemorialAllApplicationResponse memorialAPplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
-              return memorialAPplicationResponse;
+              MemorialAllApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
+              return memorialApplicationResponse;
             })
             .toList();
     return memorialApplicationResponseList;
@@ -82,7 +85,7 @@ public class MemorialApplicationService {
 
   private MemorialApplication findMemorialApplicationById(Long memorialApplicationId) {
     return memorialApplicationRepository.findById(memorialApplicationId)
-            .orElseThrow(() -> new NotFoundMemorialApplication("Not found memorial application"));
+            .orElseThrow(NotFoundMemorialApplicationException::getInstance);
   }
 
   public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
@@ -100,12 +103,11 @@ public class MemorialApplicationService {
   public void approve(Long memorialApplicationId) {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
     memorialApplication.approve();
-
     // kafka로 오케스트레이션 서버에 memorial application approve 요청 with memorialApplicationId
+    kafkaProducer.send("approved-memorial-application", memorialApplicationId.toString());
+
     // 오케스트레이션 서버에서 kafka로 memorial 서버로 생성 요청
     // 오케스트레이션 서버에서 kafka로 anime 서버의 캐릭터 상태를 'NOT_MEMORIALIZING' -> 'MEMORIALIZING'으로 변환
-
-
     // pending 상태의 같은 캐릭터에 대한 요청들을 rejected 상태로 변환
     restMemorialApplicationRejected(memorialApplicationId, memorialApplication);
   }
@@ -120,7 +122,7 @@ public class MemorialApplicationService {
     MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
     boolean existsMemorialApplicationLikes = memorialApplicationLikesRepository.existsById(memorialApplicationLikesId);
     if (existsMemorialApplicationLikes) {
-      throw new AlreadyMemorialApplicationLikes("Already exists memorial application like");
+      throw AlreadyMemorialApplicationLikesException.getInstance();
     }
     saveMemorialApplicationLike(memorialApplicationLikesId, memorialApplicationId);
   }
@@ -129,7 +131,7 @@ public class MemorialApplicationService {
   public void unlike(String userId, Long memorialApplicationId) {
     MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
     MemorialApplicationLikes memorialApplicationLikes = memorialApplicationLikesRepository.findById(memorialApplicationLikesId)
-                    .orElseThrow(() -> new NotFoundMemorialApplicationLikes("Not found memorial application likes"));
+                    .orElseThrow(NotFoundMemorialApplicationLikesException::getInstance);
     deleteMemorialApplicationLike(memorialApplicationLikes, memorialApplicationId);
   }
 

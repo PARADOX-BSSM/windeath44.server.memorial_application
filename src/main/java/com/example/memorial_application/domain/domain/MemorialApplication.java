@@ -27,6 +27,8 @@ public class MemorialApplication {
   private LocalDateTime createdAt;
   @Enumerated(EnumType.STRING)
   private MemorialApplicationState state;
+  @Version
+  private Integer version;
 
   @PrePersist
   public void init() {
