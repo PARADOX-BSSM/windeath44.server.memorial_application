@@ -15,14 +15,6 @@ public class GrpcClientService {
   @GrpcClient("anime-server")
   private GetCharacterServiceGrpc.GetCharacterServiceBlockingStub getCharacterServiceBlockingStub;
 
-
-  public String getCharacterName(MemorialApplication memorialApplication) {
-    Long characterId = memorialApplication.getCharacterId();
-    GetCharacterResponse response = getCharacter(characterId);
-    String name = response.getName();
-    return name;
-  }
-
   private GetCharacterResponse getCharacter(Long characterId) {
     GetCharacterRequest getCharacterRequest = GetCharacterRequest.newBuilder()
             .setCharacterId(characterId)

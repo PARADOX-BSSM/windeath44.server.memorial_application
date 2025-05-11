@@ -10,6 +10,7 @@ import com.example.memorial_application.domain.domain.repository.MemorialApplica
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.ResponseDto;
 import com.example.memorial_application.domain.service.exception.AlreadyMemorialApplicationLikesException;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationLikesException;
@@ -29,6 +30,7 @@ public class MemorialApplicationService {
   private final MemorialApplicationMapper memorialApplicationMapper;
   private final GrpcClientService grpcClient;
   private final KafkaProducer kafkaProducer;
+
 
   private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
   private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
@@ -68,11 +70,7 @@ public class MemorialApplicationService {
   private List<MemorialAllApplicationResponse> getMemorialApplicationList() {
     List<MemorialAllApplicationResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
             .stream()
-            .map((memorialApplication) -> {
-              String name = grpcClient.getCharacterName(memorialApplication);
-              MemorialAllApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialAllApplicationResponse(memorialApplication, name);
-              return memorialApplicationResponse;
-            })
+            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
             .toList();
     return memorialApplicationResponseList;
   }
@@ -90,11 +88,10 @@ public class MemorialApplicationService {
 
   public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
-    String name = grpcClient.getCharacterName(memorialApplication);
     MemorialApplicationLikesId memorialAPplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
 
     boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialAPplicationLikesId);
-    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, name, userDidLikes);
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
     return memorialApplicationResponse;
   }
 
