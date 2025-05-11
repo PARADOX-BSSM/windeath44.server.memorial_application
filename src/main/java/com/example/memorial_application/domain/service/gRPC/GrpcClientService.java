@@ -2,7 +2,7 @@ package com.example.memorial_application.domain.service.gRPC;
 
 import com.example.grpc.*;
 import com.example.memorial_application.domain.domain.MemorialApplication;
-import com.example.memorial_application.domain.service.exception.AlreadyMemorializedCharacter;
+import com.example.memorial_application.domain.service.exception.AlreadyMemorializedCharacterException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
@@ -34,6 +34,6 @@ public class GrpcClientService {
   public void validateNotAlreadyMemorialized(Long characterId) {
     GetCharacterResponse response = getCharacter(characterId);
     String state = response.getState();
-    if (MEMORIALIZING.equals(state)) throw new AlreadyMemorializedCharacter("Already memorialized character");
+    if (MEMORIALIZING.equals(state)) throw AlreadyMemorializedCharacterException.getInstance();
   }
 }
