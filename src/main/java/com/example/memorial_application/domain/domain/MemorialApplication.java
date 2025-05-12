@@ -47,5 +47,13 @@ public class MemorialApplication {
   public void countLikes(Long likes) {
     this.likes = likes;
   }
+
+  public void incrementLikes() {
+    this.likes++;
+  }
+
+  public void decrementLikes() {
+    this.likes--;
+  }
 }
 

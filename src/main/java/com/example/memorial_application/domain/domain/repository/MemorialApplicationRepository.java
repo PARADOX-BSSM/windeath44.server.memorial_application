@@ -21,13 +21,5 @@ public interface MemorialApplicationRepository extends JpaRepository<MemorialApp
   @Query(value = "select m from MemorialApplication m order by m.likes desc")
   List<MemorialApplication> findAllSortByLikes();
 
-  @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-  @Modifying
-  @Query(value = "update MemorialApplication m set m.likes = m.likes + 1 where m.memorialApplicationId = :memorialApplicationId")
-  void incrementLikes(@Param("memorialApplicationId") Long memorialApplicationId);
 
-  @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
-  @Modifying
-  @Query(value = "update MemorialApplication m set m.likes = m.likes - 1 where m.memorialApplicationId = :memorialApplicationId")
-  void decrementLikes(@Param("memorialApplicationId") Long memorialApplicationId);
 }
