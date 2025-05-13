@@ -134,14 +134,19 @@ public class MemorialApplicationService {
 
   private MemorialApplicationLikes deleteMemorialApplicationLike(MemorialApplicationLikes memorialApplicationLike, Long memorialApplicationId) {
     memorialApplicationLikesRepository.delete(memorialApplicationLike);
-    memorialApplicationRepository.decrementLikes(memorialApplicationId);
+
+    MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
+    memorialApplication.decrementLikes();
+
     return memorialApplicationLike;
   }
 
   private MemorialApplicationLikes saveMemorialApplicationLike(MemorialApplicationLikesId memorialApplicationLikesId, Long memorialApplicationId) {
     MemorialApplicationLikes memorialApplicationLike = memorialApplicationLikesMapper.toMemorialApplicationLike(memorialApplicationLikesId);
     memorialApplicationLikesRepository.save(memorialApplicationLike);
-    memorialApplicationRepository.incrementLikes(memorialApplicationId);
+
+    MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
+    memorialApplication.incrementLikes();
     return memorialApplicationLike;
   }
 }
