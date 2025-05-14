@@ -12,9 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class MemorialApplicationApproveServiceImpl implements MemorialApplicationService {
+public class MemorialApplicationApproveService {
   private final MemorialApplicationRepository memorialApplicationRepository;
   private final MemorialApplicationMapper memorialApplicationMapper;
+  private final MemorialApplicationFinder finder;
 
   private final GrpcClientService grpcClient;
   private final KafkaProducer kafkaProducer;
@@ -28,7 +29,7 @@ public class MemorialApplicationApproveServiceImpl implements MemorialApplicatio
 
   @Transactional
   public void approve(Long memorialApplicationId) {
-    MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
+    MemorialApplication memorialApplication = finder.findMemorialApplicationById(memorialApplicationId);
     memorialApplication.approve();
     // kafka로 오케스트레이션 서버에 memorial application approve 요청 with memorialApplicationId
     kafkaProducer.send("approved-memorial-application", memorialApplicationId.toString());
@@ -46,13 +47,8 @@ public class MemorialApplicationApproveServiceImpl implements MemorialApplicatio
 
   @Transactional
   public void reject(Long memorialApplicationId) {
-    MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
+    MemorialApplication memorialApplication = finder.findMemorialApplicationById(memorialApplicationId);
     memorialApplication.reject();
-  }
-
-  private MemorialApplication findMemorialApplicationById(Long memorialApplicationId) {
-    return memorialApplicationRepository.findById(memorialApplicationId)
-            .orElseThrow(NotFoundMemorialApplicationException::getInstance);
   }
 
 }

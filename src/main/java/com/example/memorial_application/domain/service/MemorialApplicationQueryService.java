@@ -16,9 +16,10 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class MemorialApplicationQueryServiceImpl implements MemorialApplicationService {
+public class MemorialApplicationQueryService  {
   private final MemorialApplicationRepository memorialApplicationRepository;
   private final MemorialApplicationMapper memorialApplicationMapper;
+  private final MemorialApplicationFinder finder;
 
   private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
   private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
@@ -36,12 +37,12 @@ public class MemorialApplicationQueryServiceImpl implements MemorialApplicationS
     return memorialApplicationResponseList;
   }
 
-  private MemorialApplication findMemorialApplicationById(Long memorialApplicationId) {
-    return memorialApplicationRepository.findById(memorialApplicationId)
-            .orElseThrow(NotFoundMemorialApplicationException::getInstance);
+  public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
+    MemorialApplication memorialApplication = finder.findMemorialApplicationById(memorialApplicationId);
+    boolean userDidLikes = isUserDidLikes(userId, memorialApplicationId);
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
+    return memorialApplicationResponse;
   }
-
-
 
   private boolean isUserDidLikes(String userId, Long memorialApplicationId) {
     MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
