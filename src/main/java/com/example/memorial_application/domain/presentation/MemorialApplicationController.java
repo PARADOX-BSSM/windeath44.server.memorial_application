@@ -3,7 +3,6 @@ package com.example.memorial_application.domain.presentation;
 import com.example.memorial_application.domain.presentation.dto.ResponseDtoMapper;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateRequest;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
-import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationWithCursorResponse;
 import com.example.memorial_application.domain.presentation.dto.response.ResponseDto;
 import com.example.memorial_application.domain.service.MemorialApplicationApproveService;
 import com.example.memorial_application.domain.service.MemorialApplicationQueryService;
@@ -35,9 +34,9 @@ public class MemorialApplicationController {
   }
 
   @GetMapping("/details/{cursor-id}/{size}")
-  public ResponseEntity<ResponseDto<List<MemorialApplicationWithCursorResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
-    List<MemorialApplicationWithCursorResponse> memorialApplicationResponse = memorialApplicationQueryService.findByCursor(cursorId, size);
-    ResponseDto<List<MemorialApplicationWithCursorResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
+  public ResponseEntity<ResponseDto<List<MemorialAllApplicationResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
+    List<MemorialAllApplicationResponse> memorialApplicationResponse = memorialApplicationQueryService.findByCursor(cursorId, size);
+    ResponseDto<List<MemorialAllApplicationResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);
   }
 

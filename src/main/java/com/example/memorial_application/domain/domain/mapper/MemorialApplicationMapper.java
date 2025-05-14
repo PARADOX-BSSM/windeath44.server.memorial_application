@@ -47,9 +47,4 @@ public class MemorialApplicationMapper {
 
     return new MemorialApplicationResponse(userId, characterId, content, createdAt, state, likes, userDidLike);
   }
-
-  public MemorialApplicationWithCursorResponse toMemorialApplicationWithCursor(MemorialApplication memorialApplication) {
-
-    return new MemorialApplicationWithCursorResponse();
-  }
 }

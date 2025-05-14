@@ -8,7 +8,6 @@ import com.example.memorial_application.domain.domain.repository.MemorialApplica
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
-import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationWithCursorResponse;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -51,10 +50,10 @@ public class MemorialApplicationQueryService  {
   }
 
 
-  public List<MemorialApplicationWithCursorResponse> findByCursor(Long cursorId, Long size) {
-    List<MemorialApplicationWithCursorResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
+  public List<MemorialAllApplicationResponse> findByCursor(Long cursorId, Long size) {
+    List<MemorialAllApplicationResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
             .stream()
-            .map(memorialApplicationMapper::toMemorialApplicationWithCursor)
+            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
             .toList();
     return memorialApplicationsList;
   }

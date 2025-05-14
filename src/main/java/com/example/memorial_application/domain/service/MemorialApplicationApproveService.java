@@ -3,7 +3,6 @@ package com.example.memorial_application.domain.service;
 import com.example.memorial_application.domain.domain.MemorialApplication;
 import com.example.memorial_application.domain.domain.mapper.MemorialApplicationMapper;
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
-import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
 import com.example.memorial_application.domain.service.gRPC.GrpcClientService;
 import com.example.memorial_application.global.utils.KafkaProducer;
 import lombok.RequiredArgsConstructor;
