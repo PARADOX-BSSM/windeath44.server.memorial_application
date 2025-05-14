@@ -21,5 +21,6 @@ public interface MemorialApplicationRepository extends JpaRepository<MemorialApp
   @Query(value = "select m from MemorialApplication m order by m.likes desc")
   List<MemorialApplication> findAllSortByLikes();
 
-
+  @Query(value = "select m from MemorialApplication m where m.memorialApplicationId > :cursorId order by m.memorialApplicationId asc limit :size")
+  List<MemorialApplication> findAllByCursor(@Param("cursorId") Long cursorId, @Param("size") Long size);
 }

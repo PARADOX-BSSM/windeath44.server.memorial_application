@@ -5,6 +5,7 @@ import com.example.memorial_application.domain.domain.MemorialApplication;
 import com.example.memorial_application.domain.domain.MemorialApplicationState;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationWithCursorResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -45,5 +46,10 @@ public class MemorialApplicationMapper {
     Long likes = memorialApplication.getLikes();
 
     return new MemorialApplicationResponse(userId, characterId, content, createdAt, state, likes, userDidLike);
+  }
+
+  public MemorialApplicationWithCursorResponse toMemorialApplicationWithCursor(MemorialApplication memorialApplication) {
+
+    return new MemorialApplicationWithCursorResponse();
   }
 }

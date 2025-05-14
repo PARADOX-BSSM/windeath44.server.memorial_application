@@ -1,9 +1,11 @@
 package com.example.memorial_application.domain.presentation;
 
+import com.example.memorial_application.MemorialApplication;
 import com.example.memorial_application.domain.presentation.dto.ResponseDtoMapper;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateRequest;
 import com.example.memorial_application.domain.presentation.dto.request.MemorialApplicationCreateWithCharacterRequest;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationWithCursorResponse;
 import com.example.memorial_application.domain.presentation.dto.response.ResponseDto;
 import com.example.memorial_application.domain.service.MemorialApplicationService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import java.util.List;
 public class MemorialApplicationController {
   private final MemorialApplicationService memorialApplicationService;
   private final ResponseDtoMapper responseDtoMapper;
+  private final MemorialApplication memorialApplication;
 
   @PostMapping ("/apply/withCharacter")// 캐릭터가 존재하지 않을 경우 -> 캐릭터와 추모관 신청의 생성 시점이 같다.
   public ResponseEntity<ResponseDto<Void>> applyWithCharacter(@RequestHeader("user-id") String userId, @RequestBody MemorialApplicationCreateWithCharacterRequest request) {
@@ -41,11 +44,17 @@ public class MemorialApplicationController {
             .body(responseDto);
   }
 
+  @GetMapping("/page/{cursor-id}/{size}")
+  public ResponseEntity<ResponseDto<List<MemorialApplicationWithCursorResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
+    List<MemorialApplicationWithCursorResponse> memorialApplicationResponse = memorialApplicationService.findByCursor(cursorId, size);
+    ResponseDto<List<MemorialApplicationWithCursorResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
+    return ResponseEntity.ok(responseDto);
+  }
 
   @GetMapping
   public ResponseEntity<ResponseDto<List<MemorialAllApplicationResponse>>> findAll() {
     List<MemorialAllApplicationResponse> memorialApplicationResponse = memorialApplicationService.findAll();
-    ResponseDto<List<MemorialAllApplicationResponse>> responseDto = responseDtoMapper.toResponseDto("find memorial applications", memorialApplicationResponse);
+    ResponseDto<List<MemorialAllApplicationResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials applications", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);
   }
 
