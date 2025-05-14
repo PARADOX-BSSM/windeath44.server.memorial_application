@@ -24,15 +24,6 @@ public class MemorialApplicationController {
   private final ResponseDtoMapper responseDtoMapper;
   private final MemorialApplication memorialApplication;
 
-  @PostMapping ("/apply/withCharacter")// 캐릭터가 존재하지 않을 경우 -> 캐릭터와 추모관 신청의 생성 시점이 같다.
-  public ResponseEntity<ResponseDto<Void>> applyWithCharacter(@RequestHeader("user-id") String userId, @RequestBody MemorialApplicationCreateWithCharacterRequest request) {
-    memorialApplicationService.applyWithCharacter(userId, request);
-    ResponseDto<Void> responseDto = responseDtoMapper.toResponseDto("apply memorial application with character", null);
-    return ResponseEntity
-            .status(HttpStatus.CREATED)
-            .body(responseDto);
-  }
-
   @PostMapping("/apply")
   public ResponseEntity<ResponseDto<Void>> apply(@RequestHeader("user-id") String userId, @RequestBody MemorialApplicationCreateRequest request) {
     Long characterId = request.characterId();
@@ -44,10 +35,17 @@ public class MemorialApplicationController {
             .body(responseDto);
   }
 
-  @GetMapping("/page/{cursor-id}/{size}")
+  @GetMapping("/details/{cursor-id}/{size}")
   public ResponseEntity<ResponseDto<List<MemorialApplicationWithCursorResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
     List<MemorialApplicationWithCursorResponse> memorialApplicationResponse = memorialApplicationService.findByCursor(cursorId, size);
     ResponseDto<List<MemorialApplicationWithCursorResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
+    return ResponseEntity.ok(responseDto);
+  }
+
+  @GetMapping("/details/{character-id}")
+  public ResponseEntity<ResponseDto<MemorialApplicationResponse>> findByCharacterId(@RequestHeader(value = "user-id", required = false) String userId, @PathVariable("character-id") Long characterId) {
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationService.findByCharacterId(characterId, userId);
+    ResponseDto<MemorialApplicationResponse> responseDto = responseDtoMapper.toResponseDto("find memorial application with characterId", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);
   }
 
@@ -59,7 +57,7 @@ public class MemorialApplicationController {
   }
 
   @GetMapping("/{memorial-application-id}")
-  public ResponseEntity<ResponseDto<MemorialApplicationResponse>> findById(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
+  public ResponseEntity<ResponseDto<MemorialApplicationResponse>> findById(@RequestHeader(value = "user-id", required = false) String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
     MemorialApplicationResponse memorialApplicationResponse = memorialApplicationService.findById(memorialApplicationId, userId);
     ResponseDto<MemorialApplicationResponse> responseDto = responseDtoMapper.toResponseDto("find memorial application", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);

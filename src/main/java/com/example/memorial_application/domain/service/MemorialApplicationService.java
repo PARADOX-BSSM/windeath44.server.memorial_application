@@ -28,31 +28,12 @@ import java.util.List;
 public class MemorialApplicationService {
   private final MemorialApplicationRepository memorialApplicationRepository;
   private final MemorialApplicationMapper memorialApplicationMapper;
-  private final GrpcClientService grpcClient;
-  private final KafkaProducer kafkaProducer;
-
 
   private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
   private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
 
-  public void applyWithCharacter(String userId, MemorialApplicationCreateWithCharacterRequest request) {
-    Long animeId = request.animeId();
-    String name = request.name();
-    String characterContent = request.characterContent();
-    String deathReason = request.death_reason();
-    Long lifeTime = request.lifeTime();
-
-    Long characterId = createCharacterAndGetId(animeId, name, characterContent, deathReason, lifeTime);
-    String content = request.content();
-
-    apply(userId, characterId, content);
-  }
-
-  private Long createCharacterAndGetId(Long animeId, String name, String characterContent, String deathReason, Long lifeTime) {
-    Long characterId = null;
-    // 오케스트레이션 서버에 create character 요청
-    return characterId;
-  }
+  private final GrpcClientService grpcClient;
+  private final KafkaProducer kafkaProducer;
 
   public void apply(String userId, Long characterId, String content) {
     MemorialApplication memorialApplication = memorialApplicationMapper.toMemorialApplication(userId, characterId, content);
@@ -88,11 +69,16 @@ public class MemorialApplicationService {
 
   public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
     MemorialApplication memorialApplication = findMemorialApplicationById(memorialApplicationId);
-    MemorialApplicationLikesId memorialAPplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+    boolean userDidLikes = userId != null && isUserDidLikes(userId, memorialApplicationId);
 
-    boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialAPplicationLikesId);
     MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
     return memorialApplicationResponse;
+  }
+
+  private boolean isUserDidLikes(String userId, Long memorialApplicationId) {
+      MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+      boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialApplicationLikesId);
+      return userDidLikes;
   }
 
 
@@ -157,4 +143,13 @@ public class MemorialApplicationService {
             .toList();
     return memorialApplicationsList;
   }
+
+  public MemorialApplicationResponse findByCharacterId(Long characterId, String userId) {
+    MemorialApplication memorialApplication = memorialApplicationRepository.findByCharacterId(characterId)
+            .orElseThrow(NotFoundMemorialApplicationException::getInstance);
+    boolean userDidLikes = userId != null && isUserDidLikes(userId, memorialApplication.getMemorialApplicationId());
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
+    return memorialApplicationResponse;
+  }
+
 }
