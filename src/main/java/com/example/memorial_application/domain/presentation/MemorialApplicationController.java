@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationListResponse;
 
 import java.util.List;
 
@@ -34,9 +34,9 @@ public class MemorialApplicationController {
   }
 
   @GetMapping("/details/{cursor-id}/{size}")
-  public ResponseEntity<ResponseDto<List<MemorialAllApplicationResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
-    List<MemorialAllApplicationResponse> memorialApplicationResponse = memorialApplicationQueryService.findByCursor(cursorId, size);
-    ResponseDto<List<MemorialAllApplicationResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
+  public ResponseEntity<ResponseDto<List<MemorialApplicationListResponse>>> findByCursor(@PathVariable("cursor-id") Long cursorId, @PathVariable("size") Long size) {
+    List<MemorialApplicationListResponse> memorialApplicationResponse = memorialApplicationQueryService.findByCursor(cursorId, size);
+    ResponseDto<List<MemorialApplicationListResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials application with cursor", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);
   }
 
@@ -48,9 +48,9 @@ public class MemorialApplicationController {
   }
 
   @GetMapping
-  public ResponseEntity<ResponseDto<List<MemorialAllApplicationResponse>>> findAll() {
-    List<MemorialAllApplicationResponse> memorialApplicationResponse = memorialApplicationQueryService.findAll();
-    ResponseDto<List<MemorialAllApplicationResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials applications", memorialApplicationResponse);
+  public ResponseEntity<ResponseDto<List<MemorialApplicationListResponse>>> findAll() {
+    List<MemorialApplicationListResponse> memorialApplicationResponse = memorialApplicationQueryService.findAll();
+    ResponseDto<List<MemorialApplicationListResponse>> responseDto = responseDtoMapper.toResponseDto("find memorials applications", memorialApplicationResponse);
     return ResponseEntity.ok(responseDto);
   }
 

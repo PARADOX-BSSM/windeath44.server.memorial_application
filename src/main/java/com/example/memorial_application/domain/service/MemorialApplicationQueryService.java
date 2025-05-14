@@ -6,7 +6,7 @@ import com.example.memorial_application.domain.domain.mapper.MemorialApplication
 import com.example.memorial_application.domain.domain.mapper.MemorialApplicationMapper;
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationLikesRepository;
 import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
-import com.example.memorial_application.domain.presentation.dto.response.MemorialAllApplicationResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationListResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
 import lombok.RequiredArgsConstructor;
@@ -23,13 +23,13 @@ public class MemorialApplicationQueryService  {
   private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
   private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
 
-  public List<MemorialAllApplicationResponse> findAll() {
-    List<MemorialAllApplicationResponse> memorialApplicationList = getMemorialApplicationList();
+  public List<MemorialApplicationListResponse> findAll() {
+    List<MemorialApplicationListResponse> memorialApplicationList = getMemorialApplicationList();
     return memorialApplicationList;
   }
 
-  private List<MemorialAllApplicationResponse> getMemorialApplicationList() {
-    List<MemorialAllApplicationResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
+  private List<MemorialApplicationListResponse> getMemorialApplicationList() {
+    List<MemorialApplicationListResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
             .stream()
             .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
             .toList();
@@ -50,8 +50,8 @@ public class MemorialApplicationQueryService  {
   }
 
 
-  public List<MemorialAllApplicationResponse> findByCursor(Long cursorId, Long size) {
-    List<MemorialAllApplicationResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
+  public List<MemorialApplicationListResponse> findByCursor(Long cursorId, Long size) {
+    List<MemorialApplicationListResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
             .stream()
             .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
             .toList();
