@@ -1,0 +1,69 @@
+package com.example.memorial_application.domain.service;
+
+import com.example.memorial_application.domain.domain.MemorialApplication;
+import com.example.memorial_application.domain.domain.MemorialApplicationLikesId;
+import com.example.memorial_application.domain.domain.mapper.MemorialApplicationLikesMapper;
+import com.example.memorial_application.domain.domain.mapper.MemorialApplicationMapper;
+import com.example.memorial_application.domain.domain.repository.MemorialApplicationLikesRepository;
+import com.example.memorial_application.domain.domain.repository.MemorialApplicationRepository;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationListResponse;
+import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
+import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class MemorialApplicationQueryService  {
+  private final MemorialApplicationRepository memorialApplicationRepository;
+  private final MemorialApplicationMapper memorialApplicationMapper;
+  private final MemorialApplicationFinder finder;
+
+  private final MemorialApplicationLikesRepository memorialApplicationLikesRepository;
+  private final MemorialApplicationLikesMapper memorialApplicationLikesMapper;
+
+  public List<MemorialApplicationListResponse> findAll() {
+    List<MemorialApplicationListResponse> memorialApplicationList = getMemorialApplicationList();
+    return memorialApplicationList;
+  }
+
+  private List<MemorialApplicationListResponse> getMemorialApplicationList() {
+    List<MemorialApplicationListResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
+            .stream()
+            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
+            .toList();
+    return memorialApplicationResponseList;
+  }
+
+  public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
+    MemorialApplication memorialApplication = finder.findMemorialApplicationById(memorialApplicationId);
+    boolean userDidLikes = didUserLike(userId, memorialApplicationId);
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
+    return memorialApplicationResponse;
+  }
+
+  private boolean didUserLike(String userId, Long memorialApplicationId) {
+    MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
+    boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialApplicationLikesId);
+    return userDidLikes;
+  }
+
+
+  public List<MemorialApplicationListResponse> findByCursor(Long cursorId, Long size) {
+    List<MemorialApplicationListResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
+            .stream()
+            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
+            .toList();
+    return memorialApplicationsList;
+  }
+
+  public MemorialApplicationResponse findByCharacterId(Long characterId, String userId) {
+    MemorialApplication memorialApplication = memorialApplicationRepository.findByCharacterId(characterId)
+            .orElseThrow(NotFoundMemorialApplicationException::getInstance);
+    boolean userDidLikes = userId != null && didUserLike(userId, memorialApplication.getMemorialApplicationId());
+    MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
+    return memorialApplicationResponse;
+  }
+
+}
