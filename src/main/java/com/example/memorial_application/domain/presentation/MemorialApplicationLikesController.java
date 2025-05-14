@@ -25,7 +25,6 @@ public class MemorialApplicationLikesController {
   }
 
   @DeleteMapping("/{memorial-application-id}")
-  @ResponseStatus(HttpStatus.ACCEPTED)
   public ResponseEntity<ResponseDto<Void>> unlike(@RequestHeader("user-id") String userId, @PathVariable("memorial-application-id") Long memorialApplicationId) {
     memorialApplicationLikesService.unlike(userId, memorialApplicationId);
     ResponseDto<Void> responseDto = responseDtoMapper.toResponseDto("unlike memorial application", null);

@@ -38,12 +38,12 @@ public class MemorialApplicationQueryService  {
 
   public MemorialApplicationResponse findById(Long memorialApplicationId, String userId) {
     MemorialApplication memorialApplication = finder.findMemorialApplicationById(memorialApplicationId);
-    boolean userDidLikes = isUserDidLikes(userId, memorialApplicationId);
+    boolean userDidLikes = didUserLike(userId, memorialApplicationId);
     MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
     return memorialApplicationResponse;
   }
 
-  private boolean isUserDidLikes(String userId, Long memorialApplicationId) {
+  private boolean didUserLike(String userId, Long memorialApplicationId) {
     MemorialApplicationLikesId memorialApplicationLikesId = memorialApplicationLikesMapper.toMemorialApplicationLikeId(memorialApplicationId, userId);
     boolean userDidLikes = memorialApplicationLikesRepository.existsById(memorialApplicationLikesId);
     return userDidLikes;
@@ -61,7 +61,7 @@ public class MemorialApplicationQueryService  {
   public MemorialApplicationResponse findByCharacterId(Long characterId, String userId) {
     MemorialApplication memorialApplication = memorialApplicationRepository.findByCharacterId(characterId)
             .orElseThrow(NotFoundMemorialApplicationException::getInstance);
-    boolean userDidLikes = userId != null && isUserDidLikes(userId, memorialApplication.getMemorialApplicationId());
+    boolean userDidLikes = userId != null && didUserLike(userId, memorialApplication.getMemorialApplicationId());
     MemorialApplicationResponse memorialApplicationResponse = memorialApplicationMapper.toMemorialApplicationResponse(memorialApplication, userDidLikes);
     return memorialApplicationResponse;
   }
