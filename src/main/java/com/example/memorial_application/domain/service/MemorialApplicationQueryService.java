@@ -9,7 +9,11 @@ import com.example.memorial_application.domain.domain.repository.MemorialApplica
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationListResponse;
 import com.example.memorial_application.domain.presentation.dto.response.MemorialApplicationResponse;
 import com.example.memorial_application.domain.service.exception.NotFoundMemorialApplicationException;
+import com.example.memorial_application.global.mapper.dto.CursorPage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -31,7 +35,7 @@ public class MemorialApplicationQueryService  {
   private List<MemorialApplicationListResponse> getMemorialApplicationList() {
     List<MemorialApplicationListResponse> memorialApplicationResponseList = memorialApplicationRepository.findAllSortByLikes()
             .stream()
-            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
+            .map(memorialApplicationMapper::toMemorialApplicationListResponse)
             .toList();
     return memorialApplicationResponseList;
   }
@@ -50,12 +54,15 @@ public class MemorialApplicationQueryService  {
   }
 
 
-  public List<MemorialApplicationListResponse> findByCursor(Long cursorId, Long size) {
-    List<MemorialApplicationListResponse> memorialApplicationsList = memorialApplicationRepository.findAllByCursor(cursorId, size)
-            .stream()
-            .map(memorialApplicationMapper::toMemorialAllApplicationResponse)
-            .toList();
-    return memorialApplicationsList;
+  public CursorPage<MemorialApplicationListResponse> findByCursor(Long cursorId, int size) {
+    Pageable pageable = PageRequest.of(0, size + 1);
+
+    Slice<MemorialApplication> memorialApplicationSlice = cursorId == null
+            ? memorialApplicationRepository.findPageable(pageable)
+            : memorialApplicationRepository.findPageableByCursor(cursorId, pageable);
+
+    List<MemorialApplicationListResponse> memorialApplicationsList = memorialApplicationMapper.toMemorialApplicationPageListResponse(memorialApplicationSlice);
+    return new CursorPage<>(memorialApplicationsList, memorialApplicationSlice.hasNext());
   }
 
   public MemorialApplicationResponse findByCharacterId(Long characterId, String userId) {

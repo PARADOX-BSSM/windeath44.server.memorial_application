@@ -4,7 +4,7 @@ import com.example.memorial_application.domain.domain.MemorialApplicationState;
 
 import java.time.LocalDateTime;
 
-public record MemorialApplicationListResponse(
+public record MemorialApplicationListResponse (
         // 유저 정보
         String userId,
         // 캐릭터 정보

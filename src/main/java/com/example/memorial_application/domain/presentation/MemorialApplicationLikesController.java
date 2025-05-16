@@ -1,7 +1,7 @@
 package com.example.memorial_application.domain.presentation;
 
-import com.example.memorial_application.domain.presentation.dto.ResponseDtoMapper;
-import com.example.memorial_application.domain.presentation.dto.response.ResponseDto;
+import com.example.memorial_application.global.mapper.ResponseDtoMapper;
+import com.example.memorial_application.global.mapper.dto.ResponseDto;
 import com.example.memorial_application.domain.service.MemorialApplicationLikesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
